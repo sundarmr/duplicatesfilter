@@ -1,0 +1,32 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<!-- XML Schema Generated from XML Document on Wed Apr 27 2016 14:25:22 
+		GMT-0400 (EDT) -->
+	<!-- with XmlGrid.net Free Online Service http://xmlgrid.net -->
+	<xs:complexType name="orders">
+		<xs:sequence>
+			<xs:element name="order" type="order" minOccurs="1" maxOccurs="unbounded">
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="products">
+		<xs:sequence>
+			<xs:element name="product" type="product" minOccurs="1" maxOccurs="unbounded"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="product">
+		<xs:sequence>
+			<xs:element name="productname" type="xs:string"/>
+			<xs:element name="skuid" type="xs:string"/>
+			<xs:element name="price" type="xs:double"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="order">
+	<xs:sequence>
+			<xs:element name="orderid" type="xs:string"></xs:element>
+			<xs:element name="products" type="products"></xs:element>
+			<xs:element name="customername" type="xs:string"></xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="orders" type="orders"></xs:element>
+</xs:schema>

@@ -12,12 +12,17 @@
 		xsi:schemaLocation="
        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
-
+		<bean id="fileCreator" class="com.examples.FileCreator" init-method="createFile">
+			<property name="noOfRecords" value="100000"></property>
+			<property name="duplicateInterval" value="1000"></property>
+			<property name="fileDirectory" value="/Users/smunirat/apps/myfile"/>
+		</bean>
+		
+		
 		<bean id="idempotentRoute"
 			class="com.examples.idempotent.consumer.IdempotentFileConsumer" />
-		<camelContext xmlns="http://camel.apache.org/schema/spring" streamCache="true">
-			<propertyPlaceholder id="placeholder"
-				location="classpath:sql.properties" />
+		<camelContext xmlns="http://camel.apache.org/schema/spring" streamCache="true" depends-on="fileCreator">
+			
 			<camel:routeBuilder ref="idempotentRoute" />
 		</camelContext>
 	</beans>

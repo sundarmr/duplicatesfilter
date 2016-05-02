@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.properties.PropertiesComponent;
 import org.apache.camel.component.sql.SqlComponent;
 import org.apache.camel.model.dataformat.JaxbDataFormat;
 import org.apache.camel.processor.idempotent.hazelcast.HazelcastIdempotentRepository;
@@ -26,12 +27,14 @@ public class IdempotentFileConsumer extends RouteBuilder {
 		JaxbDataFormat jaxbDataFormat = new JaxbDataFormat();
 		jaxbDataFormat.setContextPath(Order.class.getPackage().getName());
 		jaxbDataFormat.setPartClass(Order.class.getCanonicalName());
-
+		PropertiesComponent pc = new PropertiesComponent();
+		pc.setLocation("classpath:sql.properties");
+		getContext().addComponent("properties",pc);
 		getContext().addComponent("sqlComponent", getComponent());
 				
 		getContext().disableJMX();
 		
-		from("file:///Users/smunirat/apps/myfile?noop=true").streamCaching()
+		from("file:///Users/smunirat/apps/myfile")
 				.routeId("splitandaggregate")
 				.split()
 				.tokenizeXML("order")

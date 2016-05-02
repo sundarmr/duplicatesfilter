@@ -9,17 +9,20 @@ import org.apache.camel.component.sql.SqlComponent;
 import org.apache.camel.model.dataformat.JaxbDataFormat;
 import org.apache.camel.processor.idempotent.hazelcast.HazelcastIdempotentRepository;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import com.examples.helper.ArrayListAggregationStrategy;
 import com.examples.helper.ConvertToMap;
 import com.examples.model.Order;
 import com.hazelcast.core.Hazelcast;
 
+
 public class IdempotentFileConsumer extends RouteBuilder {
 
-	static int MAX_RECORDS = 1000;
-	static long BATCH_TIME_OUT = 3000;
 	BasicDataSource dataSource = null;
 
 	@Override
@@ -32,6 +35,7 @@ public class IdempotentFileConsumer extends RouteBuilder {
 		getContext().addComponent("properties",pc);
 		getContext().addComponent("sqlComponent", getComponent());
 				
+
 		getContext().disableJMX();
 		
 		from("file:///Users/smunirat/apps/myfile")
@@ -49,8 +53,8 @@ public class IdempotentFileConsumer extends RouteBuilder {
 				//Providing the HazelCast Repo and asking to skip the duplicates
 				.messageIdRepository(getHazelRepo()).skipDuplicate(true)
 				.aggregate(constant(true), new ArrayListAggregationStrategy())
-				.completionPredicate(simple("${body.size} == 1000"))
-				.completionTimeout(3000L).multicast()
+				.completionPredicate(simple("${body.size} == "+getContext().resolvePropertyPlaceholders("{{aggregateSizeOrder}}")))
+				.completionTimeout(Long.parseLong(getContext().resolvePropertyPlaceholders("{{orderAggTimeOut}}"))).multicast()
 				.parallelProcessing()
 				.to("direct:endpoint1", "direct:endpoint2").end();
 		from("direct:endpoint1").routeId("insertorder")
@@ -61,14 +65,14 @@ public class IdempotentFileConsumer extends RouteBuilder {
 				.setBody(simple("${body[products]}")).split().body()
 				.parallelProcessing()
 				.aggregate(constant(true), new ArrayListAggregationStrategy())
-				.completionPredicate(simple("${body.size} == 1000"))
-				.completionTimeout(3000L)
+				.completionPredicate(simple("${body.size} == "+getContext().resolvePropertyPlaceholders("{{aggregateSizeProduct}}")))
+				.completionTimeout(Long.parseLong(getContext().resolvePropertyPlaceholders("{{prdAggTimeOut}}")))
 				.to("sqlComponent:{{sql.insertProductRecord}}?batch=true")
 				//.log("Inserted ${header.CamelSqlUpdateCount} Product records")
 				.end();
 
 	}
-
+	
 	public BasicDataSource getDataSource() {
 		if (dataSource == null) {
 			dataSource = new BasicDataSource();
@@ -92,7 +96,11 @@ public class IdempotentFileConsumer extends RouteBuilder {
 		return rep;
 	}
 		
-		
+
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertyConfigInDev() {
+		return new PropertySourcesPlaceholderConfigurer();
+	}
 	
 
 	@Bean

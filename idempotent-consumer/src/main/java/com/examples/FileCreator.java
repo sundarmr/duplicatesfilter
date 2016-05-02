@@ -11,7 +11,7 @@ public class FileCreator {
 	
 	private long noOfRecords;
 	private int duplicateInterval;
-	private final String fileDirectory="/Users/smunirat/apps/myfile";
+	private final String fileDirectory="/Users/smunirat/apps/myfile/orders.xml";
 	
 	
 	

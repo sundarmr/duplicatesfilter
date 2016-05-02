@@ -25,7 +25,7 @@ public class ConvertToMap implements Processor {
 		Order body = arg0.getIn().getBody(Order.class);
 		Map<String, Object> obj = new HashMap<String, Object>(3);
 		obj.put(ORDERID, body.getOrderid());
-		obj.put("customername", body.getCustomername());
+		obj.put(CUSTOMERNAME, body.getCustomername());
 		List<Map<String, Object>> productsList = new ArrayList<Map<String, Object>>();
 		Map<String, Object> product = null;
 		List<Product> products = body.getProducts().getProduct();
